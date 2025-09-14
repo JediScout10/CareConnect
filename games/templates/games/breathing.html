@@ -1,0 +1,117 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-8 text-center">
+            <h1 class="text-3xl font-bold mb-6">Breathing Exercise</h1>
+            
+            <div class="relative w-64 h-64 mx-auto mb-8">
+                <div id="breathing-circle" class="absolute inset-0 bg-blue-500 rounded-full transition-transform duration-4000 ease-in-out transform scale-100 opacity-50"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <span id="instruction" class="text-2xl font-bold text-white">Breathe In</span>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <button id="startButton" onclick="startBreathing()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full transition-colors duration-300">
+                    Start
+                </button>
+                <button id="stopButton" onclick="stopBreathing()" class="hidden bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition-colors duration-300">
+                    Stop
+                </button>
+            </div>
+            
+            <div class="mt-8">
+                <p class="text-gray-600">Complete 5 breathing cycles to earn points!</p>
+                <p id="cycleCount" class="text-xl font-bold mt-2">Cycles: 0/5</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let breathingInterval;
+let isBreathing = false;
+let cycles = 0;
+const totalCycles = 5;
+
+function startBreathing() {
+    if (isBreathing) return;
+    isBreathing = true;
+    cycles = 0;
+    document.getElementById('startButton').classList.add('hidden');
+    document.getElementById('stopButton').classList.remove('hidden');
+    breathingCycle();
+}
+
+function breathingCycle() {
+    const circle = document.getElementById('breathing-circle');
+    const instruction = document.getElementById('instruction');
+    
+    // Breathe in
+    circle.style.transform = 'scale(1.5)';
+    instruction.textContent = 'Breathe In';
+    
+    setTimeout(() => {
+        // Hold
+        instruction.textContent = 'Hold';
+        
+        setTimeout(() => {
+            // Breathe out
+            circle.style.transform = 'scale(1)';
+            instruction.textContent = 'Breathe Out';
+            
+            setTimeout(() => {
+                cycles++;
+                document.getElementById('cycleCount').textContent = `Cycles: ${cycles}/${totalCycles}`;
+                
+                if (cycles >= totalCycles) {
+                    completeExercise();
+                } else if (isBreathing) {
+                    breathingCycle();
+                }
+            }, 4000); // Breathe out for 4 seconds
+        }, 4000); // Hold for 4 seconds
+    }, 4000); // Breathe in for 4 seconds
+}
+
+function stopBreathing() {
+    isBreathing = false;
+    document.getElementById('startButton').classList.remove('hidden');
+    document.getElementById('stopButton').classList.add('hidden');
+    document.getElementById('breathing-circle').style.transform = 'scale(1)';
+    document.getElementById('instruction').textContent = 'Breathe In';
+}
+
+function completeExercise() {
+    stopBreathing();
+    fetch('/games/complete/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            game_id: {{ game.id }},
+            score: 100
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Congratulations! You\'ve completed the breathing exercise!');
+            window.location.href = '/games/';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+
+<style>
+.duration-4000 {
+    transition-duration: 4000ms;
+}
+</style>
+{% endblock %} 

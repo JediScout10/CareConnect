@@ -1,0 +1,189 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold">{{ game.name }}</h1>
+                <div class="text-right">
+                    <div class="text-sm text-gray-500">Score: <span id="score">0</span></div>
+                    <div class="text-sm text-gray-500">Time: <span id="timer">0:00</span></div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <p class="text-gray-600">{{ game.instructions }}</p>
+            </div>
+
+            <div class="grid grid-cols-4 gap-4 mb-6" id="game-board">
+                <!-- Cards will be added here dynamically -->
+            </div>
+
+            <div class="flex justify-center space-x-4">
+                <button id="start-game" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Start Game
+                </button>
+                <button id="reset-game" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" disabled>
+                    Reset
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const gameData = {
+    gameId: {{ game.id }},
+    startTime: null,
+    score: 0,
+    matches: 0,
+    cards: [],
+    flippedCards: [],
+    matchedPairs: 0
+};
+
+// Card emojis for the memory game
+const cardEmojis = ['😊', '😔', '😟', '😴', '😌', '😤', '😎', '😍'];
+
+function createBoard() {
+    const board = document.getElementById('game-board');
+    board.innerHTML = '';
+    
+    // Create pairs of cards
+    const cardPairs = [...cardEmojis, ...cardEmojis];
+    
+    // Shuffle cards
+    for (let i = cardPairs.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cardPairs[i], cardPairs[j]] = [cardPairs[j], cardPairs[i]];
+    }
+    
+    // Create card elements
+    cardPairs.forEach((emoji, index) => {
+        const card = document.createElement('div');
+        card.className = 'aspect-square bg-gray-200 rounded-lg flex items-center justify-center text-4xl cursor-pointer transform transition-transform duration-200 hover:scale-105';
+        card.dataset.index = index;
+        card.dataset.emoji = emoji;
+        card.dataset.matched = 'false';
+        card.addEventListener('click', () => flipCard(card));
+        board.appendChild(card);
+    });
+    
+    gameData.cards = Array.from(board.children);
+    gameData.flippedCards = [];
+    gameData.matchedPairs = 0;
+    gameData.score = 0;
+    document.getElementById('score').textContent = '0';
+}
+
+function flipCard(card) {
+    if (gameData.flippedCards.length === 2 || card.dataset.matched === 'true') return;
+    
+    card.textContent = card.dataset.emoji;
+    card.classList.add('bg-white');
+    gameData.flippedCards.push(card);
+    
+    if (gameData.flippedCards.length === 2) {
+        checkMatch();
+    }
+}
+
+function checkMatch() {
+    const [card1, card2] = gameData.flippedCards;
+    const match = card1.dataset.emoji === card2.dataset.emoji;
+    
+    if (match) {
+        card1.dataset.matched = 'true';
+        card2.dataset.matched = 'true';
+        gameData.matchedPairs++;
+        gameData.score += 10;
+        document.getElementById('score').textContent = gameData.score;
+        
+        if (gameData.matchedPairs === cardEmojis.length) {
+            endGame();
+        }
+    } else {
+        setTimeout(() => {
+            card1.textContent = '';
+            card2.textContent = '';
+            card1.classList.remove('bg-white');
+            card2.classList.remove('bg-white');
+            gameData.score = Math.max(0, gameData.score - 1);
+            document.getElementById('score').textContent = gameData.score;
+        }, 1000);
+    }
+    
+    gameData.flippedCards = [];
+}
+
+function startGame() {
+    gameData.startTime = Date.now();
+    createBoard();
+    document.getElementById('start-game').disabled = true;
+    document.getElementById('reset-game').disabled = false;
+    updateTimer();
+}
+
+function resetGame() {
+    createBoard();
+    gameData.startTime = Date.now();
+    updateTimer();
+}
+
+function endGame() {
+    const duration = Math.floor((Date.now() - gameData.startTime) / 1000);
+    saveGameSession(duration);
+    
+    setTimeout(() => {
+        alert(`Congratulations! You completed the game!\nScore: ${gameData.score}\nTime: ${formatTime(duration)}`);
+        document.getElementById('start-game').disabled = false;
+        document.getElementById('reset-game').disabled = true;
+    }, 500);
+}
+
+function updateTimer() {
+    if (!gameData.startTime) return;
+    
+    const duration = Math.floor((Date.now() - gameData.startTime) / 1000);
+    document.getElementById('timer').textContent = formatTime(duration);
+    
+    if (!document.getElementById('reset-game').disabled) {
+        requestAnimationFrame(updateTimer);
+    }
+}
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+function saveGameSession(duration) {
+    const formData = new FormData();
+    formData.append('game_id', gameData.gameId);
+    formData.append('score', gameData.score);
+    formData.append('duration', duration);
+    formData.append('completed', 'true');
+    
+    fetch('/games/save-session/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('Game session saved successfully');
+        }
+    })
+    .catch(error => console.error('Error saving game session:', error));
+}
+
+document.getElementById('start-game').addEventListener('click', startGame);
+document.getElementById('reset-game').addEventListener('click', resetGame);
+</script>
+{% endblock %} 

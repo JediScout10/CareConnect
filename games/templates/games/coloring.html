@@ -1,0 +1,212 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header Section -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Mindful Coloring</h1>
+            <p class="text-gray-600">Take a moment to relax and express your creativity</p>
+        </div>
+
+        <!-- Coloring Canvas -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <div class="flex flex-col md:flex-row gap-6">
+                <!-- Canvas Area -->
+                <div class="flex-1">
+                    <canvas id="coloringCanvas" class="w-full border-2 border-gray-200 rounded-lg"></canvas>
+                </div>
+
+                <!-- Controls -->
+                <div class="w-full md:w-64 space-y-4">
+                    <!-- Color Palette -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-3">Colors</h3>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button class="w-8 h-8 rounded-full bg-red-500 hover:bg-red-600 transition-colors" onclick="setColor('#ef4444')"></button>
+                            <button class="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors" onclick="setColor('#3b82f6')"></button>
+                            <button class="w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 transition-colors" onclick="setColor('#22c55e')"></button>
+                            <button class="w-8 h-8 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors" onclick="setColor('#eab308')"></button>
+                            <button class="w-8 h-8 rounded-full bg-purple-500 hover:bg-purple-600 transition-colors" onclick="setColor('#a855f7')"></button>
+                            <button class="w-8 h-8 rounded-full bg-pink-500 hover:bg-pink-600 transition-colors" onclick="setColor('#ec4899')"></button>
+                            <button class="w-8 h-8 rounded-full bg-orange-500 hover:bg-orange-600 transition-colors" onclick="setColor('#f97316')"></button>
+                            <button class="w-8 h-8 rounded-full bg-teal-500 hover:bg-teal-600 transition-colors" onclick="setColor('#14b8a6')"></button>
+                        </div>
+                    </div>
+
+                    <!-- Brush Size -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-3">Brush Size</h3>
+                        <input type="range" min="1" max="20" value="5" class="w-full" id="brushSize" onchange="setBrushSize(this.value)">
+                        <div class="text-center text-sm text-gray-600" id="brushSizeValue">5px</div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="space-y-2">
+                        <button onclick="clearCanvas()" 
+                                class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                            Clear Canvas
+                        </button>
+                        <button onclick="saveDrawing()" 
+                                class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                            Save Drawing
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gallery -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold mb-4">Your Gallery</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="gallery">
+                <!-- Gallery items will be added here dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let canvas = document.getElementById('coloringCanvas');
+let ctx = canvas.getContext('2d');
+let isDrawing = false;
+let currentColor = '#ef4444';
+let brushSize = 5;
+
+// Set canvas size
+function resizeCanvas() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetWidth * 0.75;
+}
+
+// Initialize canvas
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// Drawing functions
+function startDrawing(e) {
+    isDrawing = true;
+    draw(e);
+}
+
+function stopDrawing() {
+    isDrawing = false;
+    ctx.beginPath();
+}
+
+function draw(e) {
+    if (!isDrawing) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    ctx.lineWidth = brushSize;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = currentColor;
+    
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+}
+
+// Event listeners
+canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', stopDrawing);
+canvas.addEventListener('mouseout', stopDrawing);
+
+// Touch events
+canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    const event = new MouseEvent('mousedown', {
+        clientX: x,
+        clientY: y
+    });
+    startDrawing(event);
+});
+
+canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    const event = new MouseEvent('mousemove', {
+        clientX: x,
+        clientY: y
+    });
+    draw(event);
+});
+
+canvas.addEventListener('touchend', stopDrawing);
+
+// Control functions
+function setColor(color) {
+    currentColor = color;
+}
+
+function setBrushSize(size) {
+    brushSize = size;
+    document.getElementById('brushSizeValue').textContent = size + 'px';
+}
+
+function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function saveDrawing() {
+    const dataURL = canvas.toDataURL('image/png');
+    const gallery = document.getElementById('gallery');
+    
+    const div = document.createElement('div');
+    div.className = 'relative group';
+    
+    const img = document.createElement('img');
+    img.src = dataURL;
+    img.className = 'w-full h-48 object-cover rounded-lg';
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center';
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = function() {
+        div.remove();
+    };
+    
+    overlay.appendChild(deleteBtn);
+    div.appendChild(img);
+    div.appendChild(overlay);
+    gallery.insertBefore(div, gallery.firstChild);
+    
+    // Save to server
+    fetch('/games/save-drawing/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            image: dataURL
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Drawing saved successfully!');
+        }
+    })
+    .catch(error => console.error('Error saving drawing:', error));
+}
+</script>
+{% endblock %} 

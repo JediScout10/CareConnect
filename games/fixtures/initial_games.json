@@ -1,0 +1,41 @@
+[
+    {
+        "model": "games.game",
+        "pk": 1,
+        "fields": {
+            "name": "Memory Match",
+            "description": "Test and improve your memory by matching pairs of cards. Find all matching pairs to complete the game.",
+            "game_type": "memory",
+            "difficulty": "easy",
+            "instructions": "Click on cards to reveal them. Match pairs of identical cards. Remember the positions of cards you've seen to make matches more quickly. Complete all pairs to win!",
+            "created_at": "2024-03-20T00:00:00Z",
+            "updated_at": "2024-03-20T00:00:00Z"
+        }
+    },
+    {
+        "model": "games.game",
+        "pk": 2,
+        "fields": {
+            "name": "Breathing Exercise",
+            "description": "A guided breathing exercise to help you relax and reduce stress.",
+            "game_type": "breathing",
+            "difficulty": "easy",
+            "instructions": "Follow the animated circle as it expands and contracts. Breathe in as it expands, and out as it contracts. Try to maintain this rhythm for the duration of the exercise.",
+            "created_at": "2024-03-20T00:00:00Z",
+            "updated_at": "2024-03-20T00:00:00Z"
+        }
+    },
+    {
+        "model": "games.game",
+        "pk": 3,
+        "fields": {
+            "name": "Meditation Journey",
+            "description": "A peaceful meditation game that guides you through calming visualizations.",
+            "game_type": "meditation",
+            "difficulty": "medium",
+            "instructions": "Find a quiet place and get comfortable. Follow the guided visualization prompts. Use the spacebar to progress through the journey at your own pace.",
+            "created_at": "2024-03-20T00:00:00Z",
+            "updated_at": "2024-03-20T00:00:00Z"
+        }
+    }
+] 

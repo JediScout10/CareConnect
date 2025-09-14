@@ -1,0 +1,121 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}Test Details{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Test Details</h1>
+                <p class="text-gray-600 mt-2">{{ test.test_type }} Assessment Results</p>
+            </div>
+            <a href="{% url 'users:test_history' %}" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300 transition-colors duration-200">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to History
+            </a>
+        </div>
+
+        <!-- Test Summary Card -->
+        <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h2 class="text-xl font-semibold text-gray-800">Test Summary</h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <p class="text-sm font-medium text-gray-500 mb-1">Test Type</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ test.test_type }}</p>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <p class="text-sm font-medium text-gray-500 mb-1">Score</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ test.score }}</p>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <p class="text-sm font-medium text-gray-500 mb-1">Category</p>
+                        <p class="text-lg font-semibold
+                            {% if test.category == 'Excellent' %}text-green-600
+                            {% elif test.category == 'Good' %}text-yellow-600
+                            {% else %}text-red-600{% endif %}">
+                            {{ test.category }}
+                        </p>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <p class="text-sm font-medium text-gray-500 mb-1">Date Taken</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ test.date_taken|date:"F j, Y" }}</p>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <p class="text-sm font-medium text-gray-500 mb-1">Time</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ test.date_taken|time:"g:i A" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h2 class="text-xl font-semibold text-gray-800">Recommendations</h2>
+            </div>
+            <div class="p-6">
+                <div class="prose max-w-none">
+                    {% if test.category == 'Excellent' %}
+                    <p>Your mental health appears to be in excellent condition. Continue with your current practices and routines.</p>
+                    <ul>
+                        <li>Maintain your current self-care routines</li>
+                        <li>Continue regular exercise and healthy eating</li>
+                        <li>Keep up with social connections and activities you enjoy</li>
+                    </ul>
+                    {% elif test.category == 'Good' %}
+                    <p>Your mental health is in good condition, but there's room for improvement.</p>
+                    <ul>
+                        <li>Consider adding more mindfulness practices to your routine</li>
+                        <li>Ensure you're getting adequate sleep and exercise</li>
+                        <li>Monitor your stress levels and take breaks when needed</li>
+                    </ul>
+                    {% else %}
+                    <p>Your results indicate some areas of concern that may benefit from attention.</p>
+                    <ul>
+                        <li>Consider speaking with a mental health professional</li>
+                        <li>Prioritize self-care activities like adequate sleep, nutrition, and exercise</li>
+                        <li>Practice stress-reduction techniques like deep breathing or meditation</li>
+                        <li>Reach out to supportive friends or family members</li>
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h2 class="text-xl font-semibold text-gray-800">Next Steps</h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <a href="{% url 'users:mental_health_test' %}" class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                            <i class="fas fa-clipboard-check text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="font-medium text-gray-900">Take Another Assessment</h3>
+                            <p class="text-sm text-gray-600">Try a different assessment type</p>
+                        </div>
+                    </a>
+                    <a href="{% url 'users:dashboard' %}" class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                        <div class="p-3 rounded-full bg-green-100 text-green-600">
+                            <i class="fas fa-home text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="font-medium text-gray-900">Return to Dashboard</h3>
+                            <p class="text-sm text-gray-600">View your wellness overview</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

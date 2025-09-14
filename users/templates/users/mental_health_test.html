@@ -1,0 +1,79 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}Mental Health Assessment{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Mental Health Assessment</h1>
+            <p class="text-gray-600 mt-2">Take a standardized assessment to track your mental wellbeing</p>
+        </div>
+
+        {% if test_form %}
+            <!-- Assessment Form -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-4">{{ test_type_display }}</h2>
+                <p class="text-gray-600 mb-6">Please answer all questions honestly based on your experiences over the last two weeks.</p>
+                
+                <form method="post" action="{% url 'users:mental_health_test' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="test_type" value="{{ test_type }}">
+                    
+                    {% for field in test_form %}
+                    <div class="mb-6 pb-4 border-b border-gray-200">
+                        <label class="block text-gray-800 font-medium mb-3">{{ field.label }}</label>
+                        <div class="space-y-2">
+                            {{ field }}
+                        </div>
+                        {% if field.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="mt-8 flex justify-end">
+                        <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
+                            Submit Assessment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        {% else %}
+            <!-- Test Selection -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Select an Assessment</h2>
+                <p class="text-gray-600 mb-6">Choose which standardized assessment you would like to take:</p>
+                
+                <form method="get" action="{% url 'users:mental_health_test' %}">
+                    <div class="mb-6">
+                        <label for="test_type" class="block text-gray-700 font-medium mb-2">Assessment Type</label>
+                        <select id="test_type" name="test_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="PHQ-9">PHQ-9 (Depression Screening)</option>
+                            <option value="GAD-7">GAD-7 (Anxiety Screening)</option>
+                            <option value="PSS">PSS-10 (Perceived Stress Scale)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mt-8 flex justify-end">
+                        <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
+                            Start Assessment
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900 mb-3">About These Assessments</h3>
+                    <div class="space-y-4 text-gray-600">
+                        <p><strong>PHQ-9:</strong> The Patient Health Questionnaire (9 items) screens for depression symptoms.</p>
+                        <p><strong>GAD-7:</strong> The Generalized Anxiety Disorder scale (7 items) screens for anxiety symptoms.</p>
+                        <p><strong>PSS-10:</strong> The Perceived Stress Scale (10 items) measures your perception of stress.</p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

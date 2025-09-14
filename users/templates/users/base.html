@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Care Connect - {% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+    <link rel="icon" href="data:,">
+    <style>
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+        }
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 180px;
+            }
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin: 0.25rem 0;
+            border-radius: 0.5rem;
+            color: #e5e7eb;
+        }
+        .sidebar-link:hover {
+            background-color: #1f2937;
+            color: #ffffff;
+        }
+        .sidebar-icon {
+            width: 1.5rem;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Sidebar -->
+    <div class="flex">
+        <div class="w-64 bg-gray-900 text-white min-h-screen p-5">
+            <div class="flex items-center mb-8">
+                <i class="fas fa-brain text-2xl text-blue-400 mr-3"></i>
+                <h2 class="text-2xl font-bold">CareConnect</h2>
+            </div>
+            <ul class="space-y-2">
+                <li>
+                    <a href="{% url 'users:dashboard' %}" class="sidebar-link">
+                        <i class="fas fa-house sidebar-icon"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'users:mental_health_test' %}" class="sidebar-link">
+                        <i class="fas fa-clipboard-check sidebar-icon"></i>
+                        <span>Take Assessment</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'users:test_history' %}" class="sidebar-link">
+                        <i class="fas fa-chart-line sidebar-icon"></i>
+                        <span>Test History</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'users:mood_tracking' %}" class="sidebar-link">
+                        <i class="fas fa-face-smile sidebar-icon"></i>
+                        <span>Mood Tracking</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'users:report' %}" class="sidebar-link">
+                        <i class="fas fa-chart-bar sidebar-icon"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'games:games_list' %}" class="sidebar-link">
+                        <i class="fas fa-puzzle-piece sidebar-icon"></i>
+                        <span>Games</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'meditation:meditation_page' %}" class="sidebar-link">
+                        <i class="fas fa-spa sidebar-icon"></i>
+                        <span>Meditation</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://www.amahahealth.com/therapy-psychiatry/lpexpt/2b3/?utm_term=remarketing_02feb24" 
+                       target="_blank" 
+                       class="sidebar-link bg-gray-800 hover:bg-gray-700">
+                        <i class="fas fa-stethoscope sidebar-icon"></i>
+                        <span>Find a Therapist</span>
+                    </a>
+                </li>
+                <li class="mt-8">
+                    <a href="{% url 'users:logout' %}" class="sidebar-link text-gray-400 hover:text-white">
+                        <i class="fas fa-right-from-bracket sidebar-icon"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-10">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,117 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-8 text-center">
+            <h1 class="text-3xl font-bold mb-6">Guided Meditation</h1>
+            
+            <div class="relative w-64 h-64 mx-auto mb-8">
+                <div id="meditation-circle" class="absolute inset-0 bg-purple-500 rounded-full transition-all duration-1000 ease-in-out transform scale-100 opacity-50"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <span id="timer" class="text-4xl font-bold text-white">5:00</span>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <button id="startButton" onclick="startMeditation()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full transition-colors duration-300">
+                    Start
+                </button>
+                <button id="pauseButton" onclick="pauseMeditation()" class="hidden bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-3 px-8 rounded-full transition-colors duration-300">
+                    Pause
+                </button>
+                <button id="stopButton" onclick="stopMeditation()" class="hidden bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition-colors duration-300">
+                    Stop
+                </button>
+            </div>
+            
+            <div class="mt-8">
+                <p class="text-gray-600">Complete a 5-minute meditation session to earn points!</p>
+                <p id="status" class="text-xl font-bold mt-2">Ready to begin</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let meditationTimer;
+let remainingTime = 300; // 5 minutes in seconds
+let isPaused = false;
+
+function startMeditation() {
+    if (meditationTimer) return;
+    
+    document.getElementById('startButton').classList.add('hidden');
+    document.getElementById('pauseButton').classList.remove('hidden');
+    document.getElementById('stopButton').classList.remove('hidden');
+    document.getElementById('status').textContent = 'Meditation in progress...';
+    
+    updateTimer();
+    meditationTimer = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+    if (isPaused) return;
+    
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
+    document.getElementById('timer').textContent = 
+        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    const circle = document.getElementById('meditation-circle');
+    circle.style.transform = `scale(${1 + Math.sin(remainingTime / 4) * 0.2})`;
+    
+    if (remainingTime <= 0) {
+        completeMeditation();
+    } else {
+        remainingTime--;
+    }
+}
+
+function pauseMeditation() {
+    isPaused = !isPaused;
+    const pauseButton = document.getElementById('pauseButton');
+    pauseButton.textContent = isPaused ? 'Resume' : 'Pause';
+    document.getElementById('status').textContent = 
+        isPaused ? 'Meditation paused' : 'Meditation in progress...';
+}
+
+function stopMeditation() {
+    clearInterval(meditationTimer);
+    meditationTimer = null;
+    remainingTime = 300;
+    isPaused = false;
+    
+    document.getElementById('timer').textContent = '5:00';
+    document.getElementById('startButton').classList.remove('hidden');
+    document.getElementById('pauseButton').classList.add('hidden');
+    document.getElementById('stopButton').classList.add('hidden');
+    document.getElementById('status').textContent = 'Ready to begin';
+    document.getElementById('meditation-circle').style.transform = 'scale(1)';
+}
+
+function completeMeditation() {
+    clearInterval(meditationTimer);
+    fetch('/games/complete/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            game_id: {{ game.id }},
+            score: 100
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Congratulations! You\'ve completed the meditation session!');
+            window.location.href = '/games/';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+{% endblock %} 

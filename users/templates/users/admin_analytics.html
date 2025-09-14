@@ -1,0 +1,188 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}Admin Analytics Dashboard{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Admin Analytics Dashboard</h1>
+            <p class="text-gray-600 mt-2">Overview of mental health assessments across the platform</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Total Tests Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-clipboard-check text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Assessments</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ total_tests }}</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500">PHQ-9</span>
+                        <span class="text-sm font-medium text-gray-900">{{ phq9_count }}</span>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-sm text-gray-500">GAD-7</span>
+                        <span class="text-sm font-medium text-gray-900">{{ gad7_count }}</span>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-sm text-gray-500">PSS-10</span>
+                        <span class="text-sm font-medium text-gray-900">{{ pss_count }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Average Scores Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="fas fa-chart-line text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Average Scores</p>
+                        <p class="text-2xl font-semibold text-gray-900">-</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500">PHQ-9 Avg</span>
+                        <span class="text-sm font-medium text-gray-900">{{ phq9_avg|floatformat:1 }}</span>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-sm text-gray-500">GAD-7 Avg</span>
+                        <span class="text-sm font-medium text-gray-900">{{ gad7_avg|floatformat:1 }}</span>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-sm text-gray-500">PSS-10 Avg</span>
+                        <span class="text-sm font-medium text-gray-900">{{ pss_avg|floatformat:1 }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Users</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ total_users }}</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500">Active Users</span>
+                        <span class="text-sm font-medium text-gray-900">{{ active_users }}</span>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-sm text-gray-500">Tests Per User</span>
+                        <span class="text-sm font-medium text-gray-900">{{ tests_per_user|floatformat:1 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Tests by Type Chart -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Tests Taken by Type</h2>
+                <div class="h-64">
+                    <canvas id="testsByTypeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Tests Over Time Chart -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Tests Taken Over Time</h2>
+                <div class="h-64">
+                    <canvas id="testsOverTimeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tests by Type Chart
+    const testsByTypeCtx = document.getElementById('testsByTypeChart').getContext('2d');
+    const testsByTypeChart = new Chart(testsByTypeCtx, {
+        type: 'bar',
+        data: {
+            labels: ['PHQ-9', 'GAD-7', 'PSS-10'],
+            datasets: [{
+                label: 'Number of Tests',
+                data: [{{ phq9_count }}, {{ gad7_count }}, {{ pss_count }}],
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+
+    // Tests Over Time Chart
+    const testsOverTimeCtx = document.getElementById('testsOverTimeChart').getContext('2d');
+    const testsOverTimeChart = new Chart(testsOverTimeCtx, {
+        type: 'line',
+        data: {
+            labels: {{ time_labels|safe }},
+            datasets: [{
+                label: 'Total Tests',
+                data: {{ time_data|safe }},
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                tension: 0.1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,77 @@
+
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: url('/static/users/images/s1.jpg') no-repeat center center fixed;
+        background-size: cover;
+    }
+
+    .container {
+        background: rgba(0, 0, 0, 0.4); /* More transparent box */
+        padding: 40px;
+        border-radius: 15px;
+        text-align: center;
+        color: white;
+        width: 380px;
+        box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px); /* Blur effect for glass look */
+    }
+
+    h2 {
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        border: none;
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.2); /* Slightly transparent */
+        color: white;
+        font-size: 16px;
+    }
+
+    input::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background: #1E90FF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 18px;
+        margin-top: 15px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: #007BFF;
+        transform: scale(1.05);
+    }
+
+    a {
+        color: #ADD8E6;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }

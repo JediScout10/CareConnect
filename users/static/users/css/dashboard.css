@@ -1,0 +1,258 @@
+/* users/static/users/css/dashboard.css */
+
+/* ==================== */
+/* Base Layout & Structure */
+/* ==================== */
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.container.mx-auto.p-6 {
+    max-width: 100%;
+    padding: 1.5rem;
+}
+
+/* ==================== */
+/* Chart Styles */
+/* ==================== */
+.chart-container {
+    position: relative;
+    height: 250px;
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin: 1rem 0;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+#chartLoading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 10;
+}
+
+.chartjs-tooltip {
+    background: rgba(30, 41, 59, 0.9);
+    border-radius: 4px;
+    color: white;
+    padding: 8px 12px;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+/* ==================== */
+/* Score Display */
+/* ==================== */
+.score-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.score-pill {
+    background-color: #DBEAFE;
+    color: #1E40AF;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 600;
+}
+
+.score-pill .score-value {
+    font-size: 1.25rem;
+    line-height: 1;
+    margin-right: 0.25rem;
+}
+
+.score-pill .score-max {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+.score-date {
+    color: #6B7280;
+    font-size: 0.875rem;
+}
+
+/* ==================== */
+/* Action Plan Section */
+/* ==================== */
+.action-item {
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    background-color: #f9fafb;
+}
+
+.action-item:hover {
+    background-color: #f3f4f6;
+}
+
+.action-item.completed {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.action-item.processing {
+    pointer-events: none;
+    opacity: 0.8;
+    color: #6b7280;
+}
+
+.checkmark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    margin-right: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+/* ==================== */
+/* Completed Tasks Section */
+/* ==================== */
+.completed-tasks-container {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.completed-task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.completed-task-check {
+    color: #10B981;
+    margin-right: 0.75rem;
+}
+
+.completed-task-date {
+    font-size: 0.75rem;
+    color: #6B7280;
+}
+
+/* ==================== */
+/* State Colors */
+/* ==================== */
+.state-excellent {
+    background-color: #DBEAFE;
+    color: #1E40AF;
+}
+
+.state-good {
+    background-color: #D1FAE5;
+    color: #065F46;
+}
+
+.state-caution {
+    background-color: #FEE2E2;
+    color: #B91C1C;
+}
+
+/* ==================== */
+/* Toast Notifications */
+/* ==================== */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.toast.success {
+    background-color: #10B981;
+}
+
+.toast.error {
+    background-color: #EF4444;
+}
+
+.toast.info {
+    background-color: #3B82F6;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==================== */
+/* Spinner Animation */
+/* ==================== */
+.spinner {
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ==================== */
+/* Responsive Adjustments */
+/* ==================== */
+@media (max-width: 768px) {
+    .container.mx-auto.p-6 {
+        padding: 1rem;
+    }
+    
+    .chart-container {
+        height: 200px;
+    }
+    
+    .completed-tasks-container,
+    .action-item {
+        padding: 0.75rem;
+    }
+    
+    .score-pill {
+        padding: 0.2rem 0.6rem;
+    }
+    
+    .score-pill .score-value {
+        font-size: 1.1rem;
+    }
+}
+
+.completed-tasks-container div {
+    transition: all 0.3s ease;
+    transform-origin: top;
+}
+
+.completed-tasks-container div.new-item {
+    animation: fadeInUp 0.3s ease-out;
+}

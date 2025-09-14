@@ -1,0 +1,59 @@
+{% extends 'users/base.html' %}
+{% comment %} meditation\templates\meditation\start.html {% endcomment %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">Start Meditation</h1>
+    
+    <div id="timer" class="text-4xl text-center my-8">00:00</div>
+    
+    <div class="flex justify-center space-x-4">
+        <button id="startBtn" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">
+            Start
+        </button>
+        <button id="stopBtn" class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 hidden">
+            Stop
+        </button>
+    </div>
+</div>
+
+<script>
+    let timer;
+    let seconds = 0;
+    const timerDisplay = document.getElementById('timer');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+
+    function updateTimer() {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    startBtn.addEventListener('click', () => {
+        startBtn.classList.add('hidden');
+        stopBtn.classList.remove('hidden');
+        seconds = 0;
+        updateTimer();
+        timer = setInterval(() => {
+            seconds++;
+            updateTimer();
+        }, 1000);
+    });
+
+    stopBtn.addEventListener('click', () => {
+        clearInterval(timer);
+        fetch("{% url 'meditation:meditation_page' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: `duration=${seconds}`
+        }).then(() => {
+            window.location.href = "{% url 'users:dashboard' %}";  <!-- Redirect to dashboard -->
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,162 @@
+{% comment %} users/templates/users/landpage.html {% endcomment %}
+{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Care Connect - Mental Health Analyzer</title>
+    <link rel="stylesheet" href="{% static 'users/css/style1.css' %}">
+    <style>
+        /* Emergency button style */
+        .emergency-btn {
+            background-color: red;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .emergency-btn:hover {
+            background-color: darkred;
+        }
+
+        /* Modal styles */
+        #emergencyModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left:0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 9999;
+            overflow: auto;
+        }
+        #emergencyModalContent {
+            background: white;
+            margin: 50px auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            position: relative;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .issue-btn, .back-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .issue-btn:hover, .back-btn:hover {
+            background-color: #45a049;
+        }
+        iframe {
+            width: 100%;
+            height: 315px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 10px;
+        }
+    </style>
+    <script>
+        function openEmergencyLink() {
+            document.getElementById('emergencyModal').style.display = 'block';
+        }
+
+        function closeEmergencyModal() {
+            document.getElementById('emergencyModal').style.display = 'none';
+            document.getElementById('videoSection').innerHTML = '';
+        }
+
+        function showVideos(topic) {
+            let videos = [];
+
+            if (topic === 'depression') {
+                videos = [
+                    "https://www.youtube.com/embed/Sxddnugwu-8",
+                    "https://www.youtube.com/embed/z-IR48Mb3W0"
+                ];
+            } else if (topic === 'anxiety') {
+                videos = [
+                    "https://www.youtube.com/embed/BVJkf8IuRjE",
+                    "https://www.youtube.com/embed/O-6f5wQXSu8"
+                ];
+            }
+
+            let videoHTML = '';
+            videos.forEach(link => {
+                videoHTML += `<iframe src="${link}" allowfullscreen></iframe>`;
+            });
+
+            document.getElementById('videoSection').innerHTML = videoHTML;
+        }
+    </script>
+</head>
+<body>
+    <nav>
+        <div class="logo">
+            <h2>Care Connect</h2>
+        </div>
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="{% url 'users:register' %}" class="sign-up">Get Started</a></li>
+            <li><button onclick="openEmergencyLink()" class="emergency-btn">Emergency</button></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <div class="curve-left"></div>
+        <div class="text-section">
+            <h1>Your Mental Health Matters</h1>
+            <p>Care Connect helps you analyze and improve your mental well-being with AI-driven insights. Take the first step towards a healthier mind.</p>
+            <a href="{% url 'users:login' %}" class="btn">Start Now</a>
+        </div>
+        <div class="image-section">
+            <img src="{% static 'users/images/r2.jpg' %}" alt="Mental Health Care">
+        </div>
+        <div class="curve-right"></div>
+        <div class="horizontal-curve"></div>
+        <div class="floating-circle"></div>
+        <div class="floating-circle2"></div>
+        <div class="floating-glow"></div>
+    </section>
+
+    <!-- Emergency Modal -->
+    <div id="emergencyModal">
+        <div id="emergencyModalContent">
+            <span class="close-btn" onclick="closeEmergencyModal()">&times;</span>
+            <h2>Select an Issue</h2>
+            <button class="issue-btn" onclick="showVideos('depression')">Depression</button>
+            <button class="issue-btn" onclick="showVideos('anxiety')">Anxiety</button>
+
+            <div id="videoSection"></div>
+
+            <!-- Back Button -->
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="back-btn" onclick="closeEmergencyModal()">Back</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+{% endblock %}

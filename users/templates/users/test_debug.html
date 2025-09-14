@@ -1,0 +1,65 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}Debug Test{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">Debug Test Page</h1>
+        
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">JavaScript Test</h2>
+            <button id="test-btn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                Test JavaScript
+            </button>
+            <div id="test-result" class="mt-4 p-4 bg-gray-100 rounded hidden">
+                JavaScript is working!
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Assessment Cards Test</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="assessment-card bg-blue-50 p-4 rounded cursor-pointer" data-test-type="PHQ-9">
+                    <h3 class="font-semibold">PHQ-9 Test</h3>
+                    <p class="text-sm text-gray-600">Click to test</p>
+                </div>
+                <div class="assessment-card bg-green-50 p-4 rounded cursor-pointer" data-test-type="GAD-7">
+                    <h3 class="font-semibold">GAD-7 Test</h3>
+                    <p class="text-sm text-gray-600">Click to test</p>
+                </div>
+                <div class="assessment-card bg-purple-50 p-4 rounded cursor-pointer" data-test-type="PSS">
+                    <h3 class="font-semibold">PSS Test</h3>
+                    <p class="text-sm text-gray-600">Click to test</p>
+                </div>
+            </div>
+            <div id="card-result" class="mt-4 p-4 bg-gray-100 rounded hidden">
+                Card clicked!
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Debug page loaded');
+    
+    // Test basic JavaScript
+    document.getElementById('test-btn').addEventListener('click', function() {
+        console.log('Test button clicked');
+        document.getElementById('test-result').classList.remove('hidden');
+    });
+    
+    // Test assessment cards
+    document.querySelectorAll('.assessment-card').forEach(card => {
+        card.addEventListener('click', function() {
+            console.log('Card clicked:', this.dataset.testType);
+            const result = document.getElementById('card-result');
+            result.textContent = `Clicked: ${this.dataset.testType}`;
+            result.classList.remove('hidden');
+        });
+    });
+});
+</script>
+{% endblock %}

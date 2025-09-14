@@ -1,0 +1,93 @@
+/* Reset Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+/* ====== Background Styling ====== */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: url('{% static "users/background.jpg" %}') no-repeat center center/cover; 
+    /* 🔴 Replace 'users/background.jpg' with the actual path of your image in the static folder */
+    color: white;
+}
+
+/* ====== Login Container ====== */
+.login-container {
+    background: rgba(0, 0, 0, 0.36) !important;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    width: 350px;
+    color: #fff;
+}
+
+/* Title */
+.login-container h2 {
+    margin-bottom: 20px;
+    color: #5cc3f9;
+}
+
+/* ====== Invisible Input Fields ====== */
+.login-container input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-bottom: 2px solid #5cc3f9; /* Only underline */
+    border-radius: 0;
+    font-size: 16px;
+    background: transparent;
+    color: #fff; 
+}
+
+/* Remove background focus effect */
+.login-container input:focus {
+    outline: none;
+    background: transparent;
+}
+
+/* Placeholder styling */
+.login-container input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* ====== Login Button ====== */
+.login-container button {
+    width: 100%;
+    padding: 10px;
+    background: #5cc3f9;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    color: white;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s ease-in-out;
+}
+
+.login-container button:hover {
+    background: #1f262b;
+}
+
+/* ====== Register Link ====== */
+.register-link {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #5cc3f9;
+}
+
+.register-link a {
+    color: #5cc3f9;
+    text-decoration: none;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}

@@ -1,0 +1,115 @@
+/* Background without Blur */
+/* Background without Blur */
+body {
+    background: url('/static/users/images/r5.jpg') no-repeat center center/cover;
+    position: relative;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(6px);
+    background: rgba(0, 0, 0, 0.1);
+    z-index: -1;
+} 
+
+/* Card Styling */
+.card {
+    background: rgba(0, 0, 0, 0.36); /* Black transparent background */
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.086);
+    width: 100%; /* Full width */
+    max-width: 600px; /* Adjust max-width as needed */
+    margin: 0 auto; /* Center the card */
+    color: white; /* Ensure text is visible on dark background */
+    text-align: center; /* Center-align text inside the card */
+}
+
+/* Options Styling */
+.option {
+    display: block;
+    width: 100%;
+    background: #1565C0; /* Slightly transparent white */
+    border: 2px solid #000000;  /* Dark Blue */
+    color: #ffffff;
+    font-size: 18px;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 10px auto; /* Center options horizontally */
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    text-align: left; /* Align option text to the left */
+}
+
+.option:hover {
+    background:#1e88e5;
+    color: white;
+    box-shadow: 0px 4px 10px rgba(0, 51, 102, 0.5);
+}
+
+.option.selected {
+    background: #003366;
+    color: white;
+    box-shadow: 0px 4px 10px rgba(0, 51, 102, 0.5);
+}
+
+/* Buttons */
+button {
+    font-size: 18px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    border: 2px #000000;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-top: 15px;
+    width: 100%; /* Full width */
+    max-width: 200px; /* Limit button width */
+    margin: 10px auto; /* Center buttons */
+    display: block; /* Ensure buttons are block-level for centering */
+    background: #0D47A1; /* Black background */
+    color: white; /* White text */
+}
+
+#next-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 4px 10px #91640b;
+}
+
+#dashboard-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 4px 10px #b75804;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Additional Improvements */
+#question-count {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: white; /* Ensure text is visible on dark background */
+}
+
+#question-text {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: white; /* Ensure text is visible on dark background */
+}
+
+#options-container {
+    margin-bottom: 20px;
+}

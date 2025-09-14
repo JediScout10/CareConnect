@@ -1,0 +1,45 @@
+{% comment %} users/templates/users/register.html {% endcomment %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Care Connect</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"> 
+    <link rel="stylesheet" href="{% static 'users/css/style3.css' %}">
+</head>
+
+<body>
+    <div class="container">
+        <h2>Create an Account</h2>
+        <form method="POST" action="{% url 'users:register' %}">
+            {% csrf_token %}
+            {% if form.errors %}
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
+            {% endif %}
+            {{ form.name.errors }}
+            <input type="text" placeholder="Full Name" name="name" id="{{ form.name.id_for_label }}" value="{{ form.name.value|default:'' }}" required>
+            
+            {{ form.email.errors }}
+            <input type="email" placeholder="Email" name="email" id="{{ form.email.id_for_label }}" value="{{ form.email.value|default:'' }}" required>
+            
+            {{ form.password1.errors }}
+            <input type="password" placeholder="Password" name="password1" id="{{ form.password1.id_for_label }}" required>
+            
+            {{ form.password2.errors }}
+            <input type="password" placeholder="Confirm Password" name="password2" id="{{ form.password2.id_for_label }}" required>
+            
+            <button type="submit">Register</button>
+        </form>
+        <p>Already have an account? <a href="{% url 'users:login' %}">Login</a></p>
+    </div>
+</body>
+</html>
+

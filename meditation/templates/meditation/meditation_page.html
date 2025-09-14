@@ -1,0 +1,205 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Meditation Journey</h1>
+            <p class="text-xl text-gray-600">Find your inner peace and reduce stress through guided meditation</p>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-white rounded-lg shadow-lg p-6 text-center transform hover:scale-105 transition-transform duration-300">
+                <div class="text-3xl font-bold text-blue-600 mb-2">{{ total_meditation|default:0 }}</div>
+                <div class="text-gray-600">Total Minutes</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-6 text-center transform hover:scale-105 transition-transform duration-300">
+                <div class="text-3xl font-bold text-green-600 mb-2">{{ meditation_streak|default:0 }}</div>
+                <div class="text-gray-600">Day Streak</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-6 text-center transform hover:scale-105 transition-transform duration-300">
+                <div class="text-3xl font-bold text-purple-600 mb-2">{{ total_sessions|default:0 }}</div>
+                <div class="text-gray-600">Total Sessions</div>
+            </div>
+        </div>
+
+        <!-- Meditation Timer -->
+        <div class="bg-white rounded-lg shadow-lg p-8 text-center mb-12">
+            <div class="relative w-64 h-64 mx-auto mb-8">
+                <svg class="transform -rotate-90 w-64 h-64">
+                    <circle class="text-gray-200" stroke-width="8" stroke="currentColor" fill="transparent" r="120" cx="128" cy="128"/>
+                    <circle id="progress-circle" class="text-blue-500" stroke-width="8" stroke-dasharray="754" stroke-dashoffset="754" stroke-linecap="round" stroke="currentColor" fill="transparent" r="120" cx="128" cy="128"/>
+                </svg>
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <div class="text-4xl font-bold text-gray-800" id="timer-display">5:00</div>
+                    <div class="text-gray-600">Remaining</div>
+                </div>
+            </div>
+            
+            <!-- Custom Timer Input -->
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Set Meditation Duration (minutes)</label>
+                <div class="flex items-center justify-center space-x-4">
+                    <button onclick="adjustTime(-1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-full transition-colors duration-300">-</button>
+                    <input type="number" id="custom-time" value="5" min="1" max="60" class="w-20 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                    <button onclick="adjustTime(1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-full transition-colors duration-300">+</button>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <button onclick="startCustomMeditation()" 
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-colors duration-300">
+                    Start Meditation
+                </button>
+                <button onclick="pauseMeditation()" 
+                        class="hidden bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-3 px-8 rounded-full transition-colors duration-300"
+                        id="pauseButton">
+                    Pause
+                </button>
+                <button onclick="stopMeditation()" 
+                        class="hidden bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition-colors duration-300"
+                        id="stopButton">
+                    Stop
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Sessions -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold mb-4">Recent Sessions</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for session in recent_sessions %}
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ session.created_at|date:"F d, Y" }} at {{ session.created_at|date:"h:i A" }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ session.duration }} minutes
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        Completed
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% csrf_token %}
+
+<script>
+let meditationTimer;
+let remainingTime;
+let isPaused = false;
+
+function adjustTime(change) {
+    const input = document.getElementById('custom-time');
+    let value = parseInt(input.value) + change;
+    if (value < 1) value = 1;
+    if (value > 60) value = 60;
+    input.value = value;
+}
+
+function startCustomMeditation() {
+    const duration = parseInt(document.getElementById('custom-time').value);
+    startMeditation(duration);
+}
+
+function startMeditation(duration) {
+    remainingTime = duration * 60;
+    isPaused = false;
+    document.getElementById('pauseButton').classList.remove('hidden');
+    document.getElementById('stopButton').classList.remove('hidden');
+    updateTimer();
+    meditationTimer = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+    if (isPaused) return;
+    
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
+    document.getElementById('timer-display').textContent = 
+        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    const totalSeconds = parseInt(document.getElementById('custom-time').value) * 60;
+    const progress = (remainingTime / totalSeconds) * 754;
+    document.getElementById('progress-circle').style.strokeDashoffset = progress;
+    
+    if (remainingTime <= 0) {
+        clearInterval(meditationTimer);
+        const duration = parseInt(document.getElementById('custom-time').value);
+        saveMeditationSession(duration * 60); // Pass duration in seconds
+        alert('Meditation session completed!');
+        resetTimer();
+    } else {
+        remainingTime--;
+    }
+}
+
+function pauseMeditation() {
+    isPaused = !isPaused;
+    const pauseButton = document.getElementById('pauseButton');
+    pauseButton.textContent = isPaused ? 'Resume' : 'Pause';
+}
+
+function stopMeditation() {
+    clearInterval(meditationTimer);
+    resetTimer();
+}
+
+function resetTimer() {
+    document.getElementById('timer-display').textContent = '5:00';
+    document.getElementById('progress-circle').style.strokeDashoffset = '754';
+    document.getElementById('pauseButton').classList.add('hidden');
+    document.getElementById('stopButton').classList.add('hidden');
+}
+
+function saveMeditationSession(duration) {
+    const minutes = Math.ceil(duration / 60); // Convert seconds to minutes and round up
+    fetch('/meditation/save-session/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            duration: minutes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('Session saved:', data.session);
+            window.location.reload(); // Reload to show updated stats
+        } else {
+            console.error('Error:', data.message);
+            alert('Failed to save meditation session. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error saving meditation session:', error);
+        alert('Failed to save meditation session. Please try again.');
+    });
+}
+</script>
+{% endblock %} 
