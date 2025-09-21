@@ -18,15 +18,20 @@
                 <h2 class="text-xl font-semibold mb-4">{{ test_type_display }}</h2>
                 <p class="text-gray-600 mb-6">Please answer all questions honestly based on your experiences over the last two weeks.</p>
                 
-                <form method="post" action="{% url 'users:mental_health_test' %}">
+                <form method="post" action="{% url 'users:mental_health_test' %}?test_type={{ test_type }}">
                     {% csrf_token %}
                     <input type="hidden" name="test_type" value="{{ test_type }}">
                     
                     {% for field in test_form %}
                     <div class="mb-6 pb-4 border-b border-gray-200">
                         <label class="block text-gray-800 font-medium mb-3">{{ field.label }}</label>
-                        <div class="space-y-2">
-                            {{ field }}
+                        <div class="grid grid-cols-1 gap-2">
+                            {% for choice in field %}
+                                <label class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                    {{ choice.tag }}
+                                    <span class="ml-3 text-gray-700">{{ choice.choice_label }}</span>
+                                </label>
+                            {% endfor %}
                         </div>
                         {% if field.errors %}
                         <p class="text-red-500 text-sm mt-1">{{ field.errors.0 }}</p>

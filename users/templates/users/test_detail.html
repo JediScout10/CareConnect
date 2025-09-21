@@ -18,6 +18,75 @@
             </a>
         </div>
 
+        <!-- Test Results -->
+        <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h2 class="text-xl font-semibold text-gray-800">Test Results</h2>
+            </div>
+            <div class="p-6">
+                <div class="text-center mb-6">
+                    <div class="inline-flex px-6 py-3 rounded-full text-lg font-semibold {{ test.get_color_class }} mb-4">
+                        {{ test.get_display_text }}
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-blue-600 mb-2">{{ test.score }}</div>
+                        <div class="text-sm text-gray-600">
+                            Your Score 
+                            {% if test.test_type == 'PHQ-9' %}(out of 27)
+                            {% elif test.test_type == 'GAD-7' %}(out of 21)
+                            {% elif test.test_type == 'PSS' %}(out of 40){% endif %}
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-lg font-semibold text-gray-800 mb-2">{{ test.get_severity }}</div>
+                        <div class="text-sm text-gray-600">Severity Level</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-lg font-semibold text-gray-800 mb-2">{{ test.date_taken|date:"M j, Y" }}</div>
+                        <div class="text-sm text-gray-600">Date Taken</div>
+                    </div>
+                </div>
+                
+                {% if test.needs_caution %}
+                <div class="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-red-600 mt-1"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Caution</h3>
+                            <p class="text-sm text-red-700 mt-1">
+                                {% if test.test_type == 'PHQ-9' and test.phq9_item9_score and test.phq9_item9_score > 0 %}
+                                    Your responses indicate thoughts of self-harm. Please reach out to a mental health professional immediately.
+                                {% else %}
+                                    Your score indicates severe symptoms. Consider seeking professional support.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Explanatory Text -->
+                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-blue-600 mt-1"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-800">
+                                <strong>Important:</strong> This assessment is a screening tool, not a diagnosis. 
+                                If you have concerns about your mental health, please consult with a qualified healthcare professional.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Test Summary Card -->
         <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
             <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">

@@ -1,177 +1,418 @@
 {% extends 'users/base.html' %}
 
-{% block content %}
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="h3">AI Support Assistant</h1>
-                <a href="{% url 'users:dashboard' %}" class="btn btn-outline-primary">Back to Dashboard</a>
-            </div>
-            <p class="text-muted">Get support with coping strategies and resources</p>
-        </div>
-    </div>
+{% block title %}AI Support Assistant{% endblock %}
 
-    <div class="row">
-        <!-- Chat Area -->
-        <div class="col-md-8">
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <div id="chat-messages" class="chat-container mb-3" style="height: 400px; overflow-y: auto;">
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-robot text-blue-600 mr-3"></i>
+                    AI Support Assistant
+                </h1>
+                <p class="text-gray-600 mt-2">Get personalized support with coping strategies and resources</p>
+            </div>
+            <div class="flex space-x-3 mt-4 sm:mt-0">
+                <button id="clear-chat" class="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition-colors duration-200">
+                    <i class="fas fa-broom mr-2"></i>
+                    Clear Chat
+                </button>
+                <a href="{% url 'users:dashboard' %}" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300 transition-colors duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Chat Area -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                    <!-- Chat Header -->
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                                <span class="text-sm font-medium text-gray-700">Assistant is online</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs text-gray-500">Session: {{ session.id }}</span>
+                                <button id="end-session" class="text-xs text-red-600 hover:text-red-800">End Session</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div id="chat-messages" class="h-96 overflow-y-auto p-6 space-y-4">
                         {% if not messages %}
                             <!-- Welcome message -->
-                            <div class="message system-message">
-                                <div class="message-content">
-                                    <p>Hello! I'm your mental wellness assistant. I can help with:</p>
-                                    <ul>
-                                        <li>Breathing exercises for anxiety</li>
-                                        <li>Journaling prompts for reflection</li>
-                                        <li>Stress management techniques</li>
-                                        <li>Connecting you with resources</li>
-                                    </ul>
-                                    <p>How can I support you today?</p>
+                            <div class="flex items-start space-x-3">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-robot text-blue-600 text-sm"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1 bg-gray-50 rounded-lg p-4">
+                                    <div class="text-sm text-gray-900">
+                                        <p class="mb-3">👋 Hello! I'm your mental wellness assistant. I can help with:</p>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                                            <div class="flex items-center text-green-600">
+                                                <i class="fas fa-lungs mr-2"></i>
+                                                <span>Breathing exercises</span>
+                                            </div>
+                                            <div class="flex items-center text-purple-600">
+                                                <i class="fas fa-journal-whills mr-2"></i>
+                                                <span>Journaling prompts</span>
+                                            </div>
+                                            <div class="flex items-center text-orange-600">
+                                                <i class="fas fa-leaf mr-2"></i>
+                                                <span>Stress management</span>
+                                            </div>
+                                            <div class="flex items-center text-blue-600">
+                                                <i class="fas fa-heart mr-2"></i>
+                                                <span>Mental health resources</span>
+                                            </div>
+                                        </div>
+                                        <p class="text-blue-600 font-medium">How can I support you today? 💙</p>
+                                    </div>
                                 </div>
                             </div>
                         {% else %}
                             {% for message in messages %}
-                                <div class="message {% if message.message_type == 'user' %}user-message{% else %}system-message{% endif %}">
-                                    <div class="message-content">
-                                        {{ message.content|linebreaksbr }}
+                                {% if message.message_type == 'user' %}
+                                    <!-- User message -->
+                                    <div class="flex items-start space-x-3 justify-end">
+                                        <div class="flex-1 max-w-xs sm:max-w-md">
+                                            <div class="bg-blue-600 text-white rounded-lg p-4">
+                                                <p class="text-sm">{{ message.content|linebreaksbr }}</p>
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-1 text-right">{{ message.timestamp|date:"g:i A" }}</p>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-user text-white text-sm"></i>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="message-time small text-muted">
-                                        {{ message.created_at|date:"g:i A" }}
+                                {% else %}
+                                    <!-- System message -->
+                                    <div class="flex items-start space-x-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-robot text-blue-600 text-sm"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 bg-gray-50 rounded-lg p-4">
+                                            <p class="text-sm text-gray-900">{{ message.content|linebreaksbr }}</p>
+                                            <p class="text-xs text-gray-500 mt-2">{{ message.timestamp|date:"g:i A" }}</p>
+                                        </div>
                                     </div>
-                                </div>
+                                {% endif %}
                             {% endfor %}
                         {% endif %}
-                    </div>
-                    
-                    <form id="chat-form" method="post" action="{% url 'users:chatbot' %}">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <input type="text" name="message" id="message-input" class="form-control" placeholder="Type your message here..." required>
-                            <button type="submit" class="btn btn-primary">Send</button>
+                        <div id="typing-indicator" class="hidden flex items-start space-x-3">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-robot text-blue-600 text-sm"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1 bg-gray-50 rounded-lg p-4">
+                                <div class="flex space-x-1">
+                                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                </div>
+                            </div>
                         </div>
-                    </form>
-                </div>
-            </div>
+                    </div>
 
-            <!-- Crisis Support -->
-            <div class="card border-danger mb-4">
-                <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0">Crisis Support</h5>
+                    <!-- Chat Input -->
+                    <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                        <form id="chat-form" method="post" action="{% url 'users:chatbot' %}" class="flex space-x-3">
+                            {% csrf_token %}
+                            <div class="flex-1">
+                                <input type="text" name="message" id="message-input" 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                       placeholder="Type your message here..." required>
+                            </div>
+                            <button type="submit" id="send-button" 
+                                    class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center">
+                                <i class="fas fa-paper-plane mr-2"></i>
+                                Send
+                            </button>
+                        </form>
+                        
+                        <!-- Quick Actions -->
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <button class="quick-action px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors" data-message="I'm feeling anxious">
+                                😰 Feeling anxious
+                            </button>
+                            <button class="quick-action px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors" data-message="I need breathing exercises">
+                                🫁 Breathing help
+                            </button>
+                            <button class="quick-action px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors" data-message="I want to journal">
+                                📝 Journaling
+                            </button>
+                            <button class="quick-action px-3 py-1 text-xs bg-orange-100 text-orange-700 rounded-full hover:bg-orange-200 transition-colors" data-message="I'm feeling stressed">
+                                😤 Feeling stressed
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p><strong>If you're experiencing a mental health emergency:</strong></p>
-                    <ul>
-                        <li>National Suicide Prevention Lifeline: <strong>988</strong> or <strong>1-800-273-8255</strong></li>
-                        <li>Crisis Text Line: Text <strong>HOME</strong> to <strong>741741</strong></li>
-                        <li>Or go to your nearest emergency room</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
 
-        <!-- Resources Area -->
-        <div class="col-md-4">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Helpful Resources</h5>
-                </div>
-                <div class="card-body">
-                    <div id="resources-container">
-                        {% if resources %}
-                            {% for resource in resources %}
-                                <div class="resource-item mb-3">
-                                    <h6>{{ resource.title }}</h6>
-                                    <p class="small mb-2">{{ resource.description }}</p>
-                                    <a href="{{ resource.url }}" class="btn btn-sm btn-outline-primary resource-link" 
-                                       data-resource-id="{{ resource.id }}" target="_blank">
-                                        View Resource
-                                    </a>
-                                </div>
-                                {% if not forloop.last %}<hr>{% endif %}
-                            {% endfor %}
-                        {% else %}
-                            <p>No resources available at the moment.</p>
-                        {% endif %}
+                <!-- Crisis Support -->
+                <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-xl mr-3"></i>
+                        <h3 class="text-lg font-semibold text-red-800">Crisis Support</h3>
+                    </div>
+                    <p class="text-red-700 mb-3"><strong>If you're experiencing a mental health emergency:</strong></p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="flex items-center text-red-700">
+                            <i class="fas fa-phone mr-2"></i>
+                            <span>Suicide Prevention: <strong>988</strong></span>
+                        </div>
+                        <div class="flex items-center text-red-700">
+                            <i class="fas fa-sms mr-2"></i>
+                            <span>Crisis Text: <strong>741741</strong></span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card shadow-sm">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Need More Help?</h5>
-                </div>
-                <div class="card-body">
-                    <p>If you need additional support, consider:</p>
-                    <a href="#" class="btn btn-info mb-2 w-100">Book a Counselor</a>
-                    <a href="{% url 'users:mental_health_test' %}" class="btn btn-outline-info w-100">Take Another Assessment</a>
+            <!-- Additional Support -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-hands-helping text-blue-600 mr-2"></i>
+                            Need More Help?
+                        </h3>
+                    </div>
+                    <div class="p-6 space-y-3">
+                        <a href="https://www.amahahealth.com/therapy-psychiatry/lpexpt/2b3/?utm_term=remarketing_02feb24" 
+                           target="_blank"
+                           class="block w-full px-4 py-3 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                            <i class="fas fa-stethoscope mr-2"></i>
+                            Find a Therapist
+                        </a>
+                        <a href="{% url 'users:mental_health_test' %}" 
+                           class="block w-full px-4 py-3 bg-gray-100 text-gray-700 text-center rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                            <i class="fas fa-clipboard-check mr-2"></i>
+                            Take Assessment
+                        </a>
+                        <a href="{% url 'users:mood_tracking' %}" 
+                           class="block w-full px-4 py-3 bg-gray-100 text-gray-700 text-center rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                            <i class="fas fa-face-smile mr-2"></i>
+                            Track Mood
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    .chat-container {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .message {
-        max-width: 80%;
-        padding: 10px 15px;
-        border-radius: 15px;
-        position: relative;
-    }
-    
-    .user-message {
-        align-self: flex-end;
-        background-color: #007bff;
-        color: white;
-        border-bottom-right-radius: 5px;
-        margin-left: auto;
-    }
-    
-    .system-message {
-        align-self: flex-start;
-        background-color: #f0f2f5;
-        color: #212529;
-        border-bottom-left-radius: 5px;
-    }
-    
-    .message-time {
-        font-size: 0.7rem;
-        margin-top: 5px;
-        text-align: right;
-    }
-</style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Scroll to bottom of chat
-        const chatContainer = document.getElementById('chat-messages');
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const quickActions = document.querySelectorAll('.quick-action');
+    const clearChatBtn = document.getElementById('clear-chat');
+    const endSessionBtn = document.getElementById('end-session');
+
+    // Auto-scroll to bottom of chat
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Initial scroll
+    scrollToBottom();
+
+    // Show typing indicator
+    function showTypingIndicator() {
+        typingIndicator.classList.remove('hidden');
+        scrollToBottom();
+    }
+
+    // Hide typing indicator
+    function hideTypingIndicator() {
+        typingIndicator.classList.add('hidden');
+    }
+
+    // Handle form submission
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const message = messageInput.value.trim();
         
-        // Track resource clicks
-        document.querySelectorAll('.resource-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                const resourceId = this.getAttribute('data-resource-id');
-                
-                fetch(`/resource-click/${resourceId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({})
-                })
-                .then(response => response.json())
-                .then(data => console.log('Resource click tracked'));
-            });
+        if (!message) return;
+
+        // Disable form while processing
+        sendButton.disabled = true;
+        sendButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
+        
+        // Add user message to chat immediately
+        addUserMessage(message);
+        
+        // Show typing indicator
+        showTypingIndicator();
+        
+        // Create form data with the message
+        const formData = new FormData();
+        formData.append('message', message);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        
+        // Clear input immediately after adding message
+        messageInput.value = '';
+        
+        // Submit form
+        fetch(chatForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            hideTypingIndicator();
+            
+            if (data.status === 'success') {
+                // Handle JSON response
+                addSystemMessage(data.message);
+            } else {
+                addSystemMessage('Sorry, I encountered an error. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideTypingIndicator();
+            addSystemMessage('Sorry, I encountered an error. Please try again.');
+        })
+        .finally(() => {
+            // Re-enable form
+            sendButton.disabled = false;
+            sendButton.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Send';
+            messageInput.focus();
         });
     });
+
+    // Add user message to chat
+    function addUserMessage(message) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'flex items-start space-x-3 justify-end';
+        messageDiv.innerHTML = `
+            <div class="flex-1 max-w-xs sm:max-w-md">
+                <div class="bg-blue-600 text-white rounded-lg p-4">
+                    <p class="text-sm">${message}</p>
+                </div>
+                <p class="text-xs text-gray-500 mt-1 text-right">Just now</p>
+            </div>
+            <div class="flex-shrink-0">
+                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-white text-sm"></i>
+                </div>
+            </div>
+        `;
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+    }
+
+    // Add system message to chat
+    function addSystemMessage(message) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'flex items-start space-x-3';
+        
+        // Convert markdown-style formatting to HTML
+        const formattedMessage = message
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>');
+        
+        messageDiv.innerHTML = `
+            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-robot text-white text-sm"></i>
+            </div>
+            <div class="flex-1 max-w-xs sm:max-md lg:max-w-lg">
+                <div class="bg-gray-100 rounded-lg p-4">
+                    <div class="text-sm text-gray-800">${formattedMessage}</div>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">Just now</p>
+            </div>
+        `;
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+    }
+
+    // Handle quick actions
+    quickActions.forEach(button => {
+        button.addEventListener('click', function() {
+            const message = this.getAttribute('data-message');
+            messageInput.value = message;
+            messageInput.focus();
+        });
+    });
+
+
+    // Clear chat
+    clearChatBtn.addEventListener('click', function() {
+        if (confirm('Are you sure you want to clear the chat history? This action cannot be undone.')) {
+            fetch('{% url "users:end_chat_session" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(() => {
+                window.location.reload();
+            });
+        }
+    });
+
+    // End session
+    endSessionBtn.addEventListener('click', function() {
+        if (confirm('Are you sure you want to end this chat session?')) {
+            fetch('{% url "users:end_chat_session" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(() => {
+                window.location.href = '{% url "users:dashboard" %}';
+            });
+        }
+    });
+
+    // Handle Enter key in input
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.dispatchEvent(new Event('submit'));
+        }
+    });
+
+    // Auto-resize textarea (if we change to textarea later)
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+});
 </script>
+
 {% endblock %}

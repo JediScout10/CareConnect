@@ -60,9 +60,10 @@ class MentalHealthTest(models.Model):
     date_taken = models.DateTimeField(auto_now_add=True)
     related_actions = models.ManyToManyField('Action', related_name='tests')
     category = models.CharField(max_length=20, choices=MENTAL_STATE_CHOICES, blank=True)
+    phq9_item9_score = models.IntegerField(null=True, blank=True)  # Track suicidal thoughts for caution logic
 
     def save(self, *args, **kwargs):
-        # Set category based on score
+        # Set category based on score (legacy compatibility)
         if self.score >= 16:
             self.category = 'Excellent'
         elif 11 <= self.score <= 15:
@@ -70,61 +71,108 @@ class MentalHealthTest(models.Model):
         else:
             self.category = 'Caution'
         
+        # Check if this is a new record
+        is_new = self.pk is None
+        
         # Create the test record first
         super().save(*args, **kwargs)
         
-        # Create recommendation based on test type and score
-        from .models import TestRecommendation
-        
-        # Only create recommendation if this is a new test (not an update)
-        if kwargs.get('force_insert', False) or not self.pk:
-            severity = self.get_severity()
-            recommendation_type = self.get_recommendation_type(severity)
-            
-            # Create the recommendation
-            TestRecommendation.objects.create(
-                test=self,
-                severity=severity,
-                recommendation_type=recommendation_type
-            )
+        # Create recommendation based on test type and score (only for new records)
+        if is_new:
+            try:
+                severity = self.get_severity()
+                recommendation_type = self.get_recommendation_type(severity)
+                
+                # Create the recommendation
+                TestRecommendation.objects.create(
+                    test=self,
+                    severity=severity,
+                    recommendation_type=recommendation_type
+                )
+            except Exception as e:
+                # Log the error but don't fail the test creation
+                print(f"Error creating recommendation: {e}")
+                pass
 
     def get_severity(self):
-        """Determine severity level based on test type and score"""
+        """Determine severity level based on test type and score using exact clinical standards"""
         if self.test_type == 'PHQ-9':
-            if self.score < 5:
-                return 'mild'
-            elif 5 <= self.score <= 14:
-                return 'moderate'
-            else:  # score >= 15
-                return 'severe'
+            # PHQ-9: 0-4 None/Minimal, 5-9 Mild, 10-14 Moderate, 15-19 Moderately Severe, 20-27 Severe
+            if 0 <= self.score <= 4:
+                return 'None/Minimal'
+            elif 5 <= self.score <= 9:
+                return 'Mild'
+            elif 10 <= self.score <= 14:
+                return 'Moderate'
+            elif 15 <= self.score <= 19:
+                return 'Moderately Severe'
+            elif 20 <= self.score <= 27:
+                return 'Severe'
+                
         elif self.test_type == 'GAD-7':
-            if self.score < 5:
-                return 'mild'
-            elif 5 <= self.score <= 14:
-                return 'moderate'
-            else:  # score >= 15
-                return 'severe'
+            # GAD-7: 0-4 Minimal, 5-9 Mild, 10-14 Moderate, 15-21 Severe
+            if 0 <= self.score <= 4:
+                return 'Minimal'
+            elif 5 <= self.score <= 9:
+                return 'Mild'
+            elif 10 <= self.score <= 14:
+                return 'Moderate'
+            elif 15 <= self.score <= 21:
+                return 'Severe'
+                
         elif self.test_type == 'PSS':
-            if self.score < 14:
-                return 'mild'
+            # PSS-10: 0-13 Low stress, 14-26 Moderate stress, 27-40 High stress
+            if 0 <= self.score <= 13:
+                return 'Low stress'
             elif 14 <= self.score <= 26:
-                return 'moderate'
-            else:  # score >= 27
-                return 'severe'
-        return 'moderate'  # Default fallback
+                return 'Moderate stress'
+            elif 27 <= self.score <= 40:
+                return 'High stress'
+        return 'Moderate'  # Default fallback
     
     def get_recommendation_type(self, severity):
         """Determine recommendation type based on severity"""
-        if severity == 'mild':
+        if severity in ['None/Minimal', 'Minimal', 'Low stress', 'Mild']:
             return 'self_care'
-        elif severity == 'moderate':
+        elif severity in ['Moderate', 'Moderate stress', 'Moderately Severe']:
             return 'chatbot'
-        else:  # severe
+        else:  # severe or high stress
             return 'counselor'
 
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('users:test_detail', kwargs={'pk': self.pk})
+
+    def needs_caution(self):
+        """Determine if caution should be shown based on severity or PHQ-9 item 9"""
+        severity = self.get_severity()
+        
+        # Show caution if in severe range
+        if severity in ['Severe', 'High stress']:
+            return True
+            
+        # For PHQ-9, show caution if item 9 (suicidal thoughts) > 0
+        if self.test_type == 'PHQ-9' and self.phq9_item9_score and self.phq9_item9_score > 0:
+            return True
+            
+        return False
+    
+    def get_color_class(self):
+        """Get CSS color class based on severity"""
+        severity = self.get_severity()
+        
+        if severity in ['None/Minimal', 'Minimal', 'Low stress']:
+            return 'text-green-600 bg-green-100'
+        elif severity in ['Mild', 'Moderate', 'Moderate stress', 'Moderately Severe']:
+            return 'text-yellow-600 bg-yellow-100'
+        else:  # Severe, High stress
+            return 'text-red-600 bg-red-100'
+    
+    def get_display_text(self):
+        """Get formatted display text for score and severity"""
+        severity = self.get_severity()
+        caution_text = " — Caution" if self.needs_caution() else ""
+        return f"{self.test_type}: Score {self.score} — {severity}{caution_text}"
 
     def __str__(self):
         return f"{self.user.email} - {self.test_type} - {self.score} ({self.category})"
